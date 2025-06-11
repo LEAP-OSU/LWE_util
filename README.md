@@ -1,2 +1,2 @@
 # LWE-post-processing
-This repository holds code useful for post processing simulation results from Lightwave Explorer. Lightwave Explorer in a nonlinear optics simulation framework developed by Nick Karpowicz and can be found [here](https://github.com/NickKarpowicz/LightwaveExplorer/tree/master)
+This repository holds code useful for post processing simulation results from Lightwave Explorer. Lightwave Explorer in a nonlinear optics simulation framework developed by Nick Karpowicz and can be found [here](https://github.com/NickKarpowicz/LightwaveExplorer/tree/master). The module holds functions which interact directly with the LWE module which can be found on the LWE GitHub page. This repository is currently a work in progress.
