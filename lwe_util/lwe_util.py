@@ -6,26 +6,48 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import hilbert
 
-def import_data(sim_object: lwe.lightwaveExplorerResult, 
-                Ex: bool = True, 
-                Ey: bool = True, 
-                freq: bool = True, 
-                spectrum_x: bool = True,
-                spectrum_y: bool = True, 
-                time: bool = True) -> list:
+def import_data(sim_object: lwe.lightwaveExplorerResult, data_keys: dict = None) -> dict:
+    """
+    Import data from a LightwaveExplorer result based on requested keys
     
+    Args:
+        sim_object: LightwaveExplorer result object
+        data_keys: Dictionary with keys representing what data to import, e.g. {"Ex": True, "Ey": False}
+                   If None, imports all available data
+    
+    Returns:
+        Dictionary containing the requested data
+    """
     # Check object type
     if not isinstance(sim_object, lwe.lightwaveExplorerResult):
         raise TypeError(f"import_data expected a LightwaveExplorer, "
                         f"got {type(sim_object).__name__!r}")
     
+    # If no keys specified, import everything
+    if data_keys is None:
+        data_keys = {
+            "Ex": True, 
+            "Ey": True, 
+            "freq": True, 
+            "spectrum_x": True,
+            "spectrum_y": True, 
+            "time": True
+        }
+    
     data = {}
-    if Ex:          data["Ex"] = sim_object.Ext_x
-    if Ey:          data["Ey"] = sim_object.Ext_y
-    if freq:        data["freq"] = sim_object.frequencyVectorSpectrum
-    if spectrum_x:  data["spectrum_x"] = sim_object.spectrum_x
-    if spectrum_y:  data["spectrum_y"] = sim_object.spectrum_y
-    if time:        data["time"] = sim_object.timeVector
+    if data_keys.get("Ex", False):
+        data["Ex"] = sim_object.Ext_x
+    if data_keys.get("Ey", False):
+        data["Ey"] = sim_object.Ext_y
+    if data_keys.get("freq", False):
+        data["freq"] = sim_object.frequencyVectorSpectrum
+    if data_keys.get("spectrum_x", False):
+        data["spectrum_x"] = sim_object.spectrum_x
+    if data_keys.get("spectrum_y", False):
+        data["spectrum_y"] = sim_object.spectrum_y
+    if data_keys.get("time", False):
+        data["time"] = sim_object.timeVector
+        
     return data
 
 def radially_average(E_field: np.ndarray, radius: float, spatial_step: float, timeVector: list = []) -> tuple:
@@ -104,7 +126,7 @@ def radially_average(E_field: np.ndarray, radius: float, spatial_step: float, ti
 
     if len(timeVector):
         plt.figure(figsize=(10, 5))
-        plt.plot(timeVector * 1e15, average * 1e-9, label=r'Radially Averaged $E_{x}$')
+        plt.plot(timeVector * 1e15, average * 1e-9, color='blue', label=r'Radially Averaged $E_{x}$')
         plt.plot(timeVector * 1e15, envelope * 1e-9, color='red', linestyle='--', label=r'Radially Averaged $E_{x}$ Envelope')
         plt.xlabel('Time (fs)')
         plt.ylabel(r'$E_{x}$ (GV/m)')
@@ -253,7 +275,7 @@ def map_peak_intensity(beam_waist: float, rayleigh_length: float, max_z: float, 
 
     return (beam_radius[0], peak_intensities)
 
-def calculate_pulse_duration(E_field: np.ndarray, radius: float, spatial_step: float, timeVector: list, verbose: bool = False) -> float:
+def calculate_pulse_duration(E_field: np.ndarray, radius: float, spatial_step: float, timeVector: list, verbose: bool = True) -> float:
     """
     Calculates the pulse duration of some pulse using a radially averged E field.
 
@@ -267,17 +289,14 @@ def calculate_pulse_duration(E_field: np.ndarray, radius: float, spatial_step: f
         pulse_duration: the FWHM of the averaged E fields temporal intensity distribution (s)
     
     """
-    if verbose:
-        E_avg = radially_average(E_field, radius, spatial_step, timeVector = timeVector)
-    else:
-        E_avg = radially_average(E_field, radius, spatial_step)
+    E_avg = radially_average(E_field, radius, spatial_step)
 
     pulse_duration = lwe.fwhm(timeVector, E_avg[1]**2)
 
     if verbose:
         plt.figure(figsize=(10, 5))
-        plt.plot(timeVector * 1e15, (E_avg[0] * 1e-9)**2, label=r'$E_{avg}(t)^2$')
-        plt.plot(timeVector * 1e15, (E_avg[1] * 1e-9)**2, label='Envelope', linestyle='--')
+        plt.plot(timeVector * 1e15, (E_avg[0] * 1e-9)**2, color='blue', label=r'$E_{avg}(t)^2$')
+        plt.plot(timeVector * 1e15, (E_avg[1] * 1e-9)**2, color='red', label='Envelope', linestyle='--')
         peak_y = (E_avg[1] * 1e-9).max()**2
         plt.text(20, peak_y - (0.2 * peak_y), f'FWHM: {pulse_duration * 1e15:.2f} fs',
                 fontsize=12, color='red',
@@ -308,3 +327,6 @@ def calculate_beam_radius(E_field: np.ndarray, spatial_step: float, intensity_dr
     t0, j0 = np.unravel_index(np.argmax(I), I.shape)
     I_prof = I[t0, :]
     I_half = 0.5 * I_prof.max()
+
+def envelope():
+    return
