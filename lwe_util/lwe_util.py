@@ -310,6 +310,7 @@ def calculate_pulse_duration(E_field: np.ndarray, radius: float, spatial_step: f
 
     return pulse_duration
 
+#TODO: Finish this function. 
 def calculate_beam_radius(E_field: np.ndarray, spatial_step: float, intensity_drop: float = 0.5) -> float:
     """
     Calculates the half intensity radius of an E_field matrix. The % of intensity drop off used for the radius calculation can be changed
@@ -327,6 +328,3 @@ def calculate_beam_radius(E_field: np.ndarray, spatial_step: float, intensity_dr
     t0, j0 = np.unravel_index(np.argmax(I), I.shape)
     I_prof = I[t0, :]
     I_half = 0.5 * I_prof.max()
-
-def envelope():
-    return
